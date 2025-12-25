@@ -1,0 +1,3002 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>酷监控 - 网站状态监控</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* 深色主题（默认） */
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-card: #1c2128;
+            --bg-hover: #252d38;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --border-color: #30363d;
+            --accent-green: #00a33c;
+            --accent-green-light: #00b844;
+            --accent-red: #f85149;
+            --accent-yellow: #d29922;
+            --accent-blue: #58a6ff;
+            --accent-purple: #a371f7;
+            --accent-orange: #db6d28;
+            --shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+        
+        /* 浅色主题 */
+        [data-theme="light"] {
+            --bg-primary: #f6f8fa;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --bg-hover: #f3f4f6;
+            --text-primary: #1f2328;
+            --text-secondary: #57606a;
+            --text-muted: #8b949e;
+            --border-color: #d0d7de;
+            --accent-green: #00a33c;
+            --accent-green-light: #00b844;
+            --accent-red: #cf222e;
+            --accent-yellow: #9a6700;
+            --accent-blue: #0969da;
+            --accent-purple: #8250df;
+            --accent-orange: #bc4c00;
+            --shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+        
+        /* 浅色主题按钮样式 */
+        [data-theme="light"] .btn-primary {
+            background: var(--accent-green);
+            color: #fff;
+        }
+        
+        [data-theme="light"] .btn-secondary {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        
+        [data-theme="light"] .btn-secondary:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent-green);
+        }
+        
+        [data-theme="light"] .btn-icon {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+        }
+        
+        [data-theme="light"] .stat-card {
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        
+        [data-theme="light"] .monitor-card {
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        
+        [data-theme="light"] .refresh-bar {
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 主页面 - 卡片列表 */
+        .home-page {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-green);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent-green);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-green-light);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+        
+        .btn-icon:hover {
+            border-color: var(--accent-yellow);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+        }
+
+        /* 统计卡片 */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 16px 20px;
+            border: 2px solid transparent;
+        }
+        
+        .stat-card:hover {
+            border-color: var(--border-color);
+            transform: translateY(-2px);
+        }
+        
+        .stat-card.active {
+            border-color: var(--accent-green);
+            background: rgba(63, 185, 80, 0.05);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .stat-value.green { color: var(--accent-green); }
+        .stat-value.red { color: var(--accent-red); }
+        .stat-value.yellow { color: var(--accent-yellow); }
+        .stat-value.blue { color: var(--accent-blue); }
+
+        /* 监控卡片网格 */
+        .monitors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 16px;
+        }
+
+        /* 单个监控卡片 */
+        .monitor-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 20px 24px;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s;
+        }
+
+        .monitor-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border-color: var(--accent-green);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .card-title-section {
+            flex: 1;
+        }
+
+        .card-status-icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            flex-shrink: 0;
+            font-size: 10px;
+        }
+
+        .card-status-icon.online {
+            background: var(--accent-green);
+            color: #000;
+        }
+
+        .card-status-icon.offline {
+            background: var(--accent-red);
+            color: #fff;
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+
+        .card-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 4px;
+        }
+
+        .card-tag {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: transparent;
+            color: var(--text-muted);
+        }
+
+        .card-tag.method {
+            color: var(--accent-blue);
+        }
+
+        .card-tag.type {
+            color: var(--accent-purple);
+        }
+        
+        .card-type-line {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+        
+        /* SSL证书区域 */
+        .ssl-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            border-radius: 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .ssl-section.ssl-safe {
+            background: rgba(63, 185, 80, 0.08);
+            border-color: rgba(63, 185, 80, 0.3);
+        }
+        
+        .ssl-section.ssl-warning {
+            background: rgba(210, 153, 34, 0.08);
+            border-color: rgba(210, 153, 34, 0.3);
+        }
+        
+        .ssl-section.ssl-danger {
+            background: rgba(248, 81, 73, 0.08);
+            border-color: rgba(248, 81, 73, 0.3);
+        }
+        
+        .ssl-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .ssl-icon-large {
+            font-size: 20px;
+        }
+        
+        .ssl-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        .ssl-right {
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+        }
+        
+        .ssl-days-large {
+            font-size: 24px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .ssl-safe .ssl-days-large { color: var(--accent-green); }
+        .ssl-warning .ssl-days-large { color: var(--accent-yellow); }
+        .ssl-danger .ssl-days-large { color: var(--accent-red); }
+        
+        .ssl-unit {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+        
+        /* 信息行 */
+        .card-info-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* 圆环进度条 */
+        .uptime-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .uptime-ring {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+        }
+
+        .uptime-ring svg {
+            transform: rotate(-90deg);
+        }
+
+        .uptime-ring-bg {
+            fill: none;
+            stroke: var(--bg-hover);
+            stroke-width: 4;
+        }
+
+        .uptime-ring-progress {
+            fill: none;
+            stroke: var(--accent-green);
+            stroke-width: 4;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.5s;
+        }
+
+        .uptime-ring-progress.warning {
+            stroke: var(--accent-yellow);
+        }
+
+        .uptime-ring-progress.danger {
+            stroke: var(--accent-red);
+        }
+
+        .uptime-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--accent-green);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .uptime-text.warning {
+            color: var(--accent-yellow);
+        }
+        
+        .uptime-text.danger {
+            color: var(--accent-red);
+        }
+
+        /* 统计信息行 */
+        .card-stats-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 12px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .card-stats {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+        }
+
+        .card-stat {
+            white-space: nowrap;
+        }
+        
+        .stat-value-green {
+            color: var(--accent-green);
+            font-weight: 500;
+        }
+
+        .status-legend {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            white-space: nowrap;
+        }
+
+        .legend-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .legend-dot.online { background: var(--accent-green); }
+        .legend-dot.maintenance { background: var(--accent-yellow); }
+        .legend-dot.offline { background: var(--accent-red); }
+
+        /* 状态历史条 */
+        .status-bar-section {
+            margin-bottom: 20px;
+        }
+
+        .status-bars {
+            display: flex;
+            gap: 2px;
+            height: 24px;
+            align-items: stretch;
+        }
+
+        .status-bar {
+            flex: 1;
+            border-radius: 2px;
+            min-width: 3px;
+            transition: transform 0.2s;
+        }
+
+        .status-bar:hover {
+            transform: scaleY(1.15);
+        }
+
+        .status-bar.online { background: var(--accent-green); }
+        .status-bar.offline { background: var(--accent-red); }
+        .status-bar.pending { background: var(--bg-hover); }
+
+        /* 分隔线 */
+        .card-divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: 16px 0;
+        }
+
+        /* 时间范围切换 */
+        .range-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            justify-content: center;
+        }
+
+        .range-tab {
+            padding: 6px 14px;
+            font-size: 12px;
+            background: var(--bg-secondary);
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .range-tab:hover {
+            color: var(--text-primary);
+            border-color: var(--text-muted);
+        }
+
+        .range-tab.active {
+            background: var(--border-color);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+            font-weight: 500;
+        }
+
+        /* 响应时间图表 */
+        .chart-wrapper {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chart-y-labels {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-size: 10px;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            min-width: 50px;
+            text-align: right;
+            padding: 2px 0;
+        }
+
+        .chart-main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .chart-canvas {
+            width: 100%;
+            height: 80px;
+            display: block;
+        }
+
+        .chart-x-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* ========== 详情页 ========== */
+        .detail-page {
+            display: none;
+            height: 100vh;
+        }
+
+        .detail-page.active {
+            display: flex;
+        }
+
+        .home-page.hidden {
+            display: none;
+        }
+
+        /* 左侧边栏 */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent-green);
+            margin-bottom: 16px;
+        }
+
+        .sidebar-add-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent-green);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .sidebar-add-btn:hover {
+            background: var(--accent-green-light);
+        }
+
+        .sidebar-search {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 12px;
+            padding-left: 36px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236e7681'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: 10px center;
+            background-size: 16px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-green);
+        }
+
+        .sidebar-title {
+            padding: 16px 20px 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 12px 20px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .sidebar-item.active {
+            background: var(--bg-hover);
+            border-left: 3px solid var(--accent-green);
+        }
+
+        .sidebar-item-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: var(--bg-card);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 14px;
+        }
+
+        .sidebar-item-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .sidebar-item-name {
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-item-status {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .sidebar-item-status.online {
+            background: var(--accent-green);
+            box-shadow: 0 0 8px var(--accent-green);
+        }
+
+        .sidebar-item-status.offline {
+            background: var(--accent-red);
+        }
+
+        /* 右侧主内容区 */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            background: var(--bg-primary);
+        }
+
+        .content-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-secondary);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .content-nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .back-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-btn:hover {
+            background: var(--bg-hover);
+        }
+
+        .content-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .content-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .content-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        /* 状态统计条 */
+        .status-stats {
+            display: flex;
+            gap: 16px;
+            padding: 20px 24px;
+            background: var(--bg-secondary);
+            flex-wrap: wrap;
+        }
+
+        .status-stat {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 16px 24px;
+            border: 1px solid var(--border-color);
+            min-width: 120px;
+            flex: 1;
+        }
+
+        .status-stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .status-stat-label {
+            font-size: 14px;
+        }
+
+        .status-stat-label.green { color: var(--accent-green); }
+        .status-stat-label.red { color: var(--accent-red); }
+        .status-stat-label.yellow { color: var(--accent-yellow); }
+        .status-stat-label.blue { color: var(--accent-blue); }
+        .status-stat-label.purple { color: var(--accent-purple); }
+
+        .status-stat-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .status-stat-icon.green { background: rgba(63, 185, 80, 0.2); color: var(--accent-green); }
+        .status-stat-icon.red { background: rgba(248, 81, 73, 0.2); color: var(--accent-red); }
+        .status-stat-icon.yellow { background: rgba(210, 153, 34, 0.2); color: var(--accent-yellow); }
+        .status-stat-icon.blue { background: rgba(88, 166, 255, 0.2); color: var(--accent-blue); }
+        .status-stat-icon.purple { background: rgba(163, 113, 247, 0.2); color: var(--accent-purple); }
+
+        .status-stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* 历史记录表格 */
+        .history-section {
+            padding: 24px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .history-table {
+            width: 100%;
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .history-table th,
+        .history-table td {
+            padding: 14px 16px;
+            text-align: left;
+        }
+
+        .history-table th {
+            background: var(--bg-hover);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .history-table td {
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+
+        .history-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .history-table tr:hover td {
+            background: var(--bg-hover);
+        }
+
+        .table-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent-blue);
+            cursor: pointer;
+        }
+
+        .table-name:hover {
+            text-decoration: underline;
+        }
+
+        .table-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .table-status.online {
+            background: rgba(63, 185, 80, 0.15);
+            color: var(--accent-green);
+        }
+
+        .table-status.offline {
+            background: rgba(248, 81, 73, 0.15);
+            color: var(--accent-red);
+        }
+
+        .table-status.paused {
+            background: rgba(163, 113, 247, 0.15);
+            color: var(--accent-purple);
+        }
+
+        .table-time {
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+        }
+
+        .table-message {
+            color: var(--text-secondary);
+        }
+
+        /* 模态框 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border-radius: 16px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            background: var(--bg-hover);
+            cursor: pointer;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--accent-green);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .type-checkboxes {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 8px;
+        }
+
+        .type-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--bg-secondary);
+        }
+
+        .type-checkbox:hover {
+            border-color: var(--accent-green);
+        }
+
+        .type-checkbox.selected {
+            border-color: var(--accent-green);
+            background: rgba(63, 185, 80, 0.1);
+        }
+
+        .type-checkbox-icon {
+            font-size: 16px;
+        }
+
+        .type-checkbox-label {
+            font-size: 13px;
+        }
+        
+        /* 通知渠道样式 */
+        .notify-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+        
+        .notify-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            padding: 10px 12px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-blue);
+        }
+        
+        .notify-hint code {
+            background: var(--bg-hover);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--accent-green);
+        }
+        
+        .notify-code {
+            width: 100%;
+            min-height: 200px;
+            padding: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            resize: vertical;
+        }
+        
+        .notify-code:focus {
+            outline: none;
+            border-color: var(--accent-green);
+        }
+        
+        .notify-code::placeholder {
+            color: var(--text-muted);
+        }
+        
+        .btn-warning {
+            background: var(--accent-yellow);
+            color: #000;
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        
+        /* 通知渠道选择列表 */
+        .notify-settings-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+        
+        .notify-channels-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .notify-channel-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .notify-channel-item:hover {
+            border-color: var(--accent-blue);
+        }
+        
+        .notify-channel-item:has(.notify-checkbox:checked) {
+            border-color: var(--accent-blue);
+            background: rgba(88, 166, 255, 0.08);
+        }
+        
+        .notify-checkbox {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent-blue);
+            cursor: pointer;
+        }
+        
+        .notify-channel-icon {
+            font-size: 20px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-hover);
+            border-radius: 8px;
+        }
+        
+        .notify-channel-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .notify-channel-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .notify-channel-type {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        
+        .notify-settings-hint {
+            font-size: 11px;
+            color: var(--accent-yellow);
+            margin: 0;
+        }
+        
+        /* 通知渠道管理 */
+        .notify-channels-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        
+        .notify-channels-header .notify-desc {
+            margin: 0;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        .notify-channels-manage {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .empty-channels {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+        
+        .channel-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+        }
+        
+        .channel-item-icon {
+            font-size: 20px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-hover);
+            border-radius: 8px;
+        }
+        
+        .channel-item-info {
+            flex: 1;
+        }
+        
+        .channel-item-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .channel-item-type {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        
+        .channel-item-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .channel-item-actions button {
+            padding: 4px 10px;
+            font-size: 11px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-edit {
+            background: var(--accent-blue);
+            color: #fff;
+        }
+        
+        .btn-delete {
+            background: var(--accent-red);
+            color: #fff;
+        }
+        
+        /* 渠道表单 */
+        .channel-form {
+            padding: 16px;
+            background: var(--bg-hover);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .channel-form-header {
+            margin-bottom: 16px;
+        }
+        
+        .channel-form-header h4 {
+            margin: 0;
+            font-size: 15px;
+            color: var(--text-primary);
+        }
+        
+        .channel-form-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 16px;
+        }
+
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* 刷新控制栏 */
+        .refresh-bar {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px 20px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        
+        .refresh-progress-section {
+            flex: 1;
+        }
+        
+        .refresh-progress-bar {
+            height: 6px;
+            background: var(--bg-hover);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+        
+        .refresh-progress-fill {
+            height: 100%;
+            background: var(--accent-blue);
+            border-radius: 3px;
+            transition: width 1s linear;
+            width: 0%;
+        }
+        
+        .refresh-info {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        .refresh-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .refresh-countdown {
+            font-size: 12px;
+            color: var(--text-muted);
+            min-width: 100px;
+            text-align: right;
+        }
+        
+        .btn-refresh {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            font-size: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-refresh:hover {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+        
+        .btn-refresh.paused {
+            background: rgba(210, 153, 34, 0.1);
+            border-color: var(--accent-yellow);
+            color: var(--accent-yellow);
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1001;
+        }
+
+        .toast {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px 20px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.success { border-left: 4px solid var(--accent-green); }
+        .toast.error { border-left: 4px solid var(--accent-red); }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* 响应式 - 平板端 */
+        @media (max-width: 1024px) {
+            .monitors-grid {
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            }
+        }
+        
+        /* 响应式 - 手机端 */
+        @media (max-width: 768px) {
+            .home-page {
+                padding: 12px;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+            
+            .logo {
+                text-align: center;
+            }
+            
+            .header-actions {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .monitors-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            
+            .stat-card {
+                padding: 12px 14px;
+            }
+            
+            .stat-value {
+                font-size: 24px;
+            }
+            
+            .refresh-bar {
+                flex-direction: column;
+                gap: 12px;
+                padding: 12px 16px;
+            }
+            
+            .refresh-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .refresh-countdown {
+                text-align: left;
+                min-width: auto;
+            }
+            
+            .card-stats-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .range-tabs {
+                gap: 8px;
+            }
+            
+            .range-tab {
+                padding: 5px 10px;
+                font-size: 11px;
+            }
+
+            .detail-page {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                max-height: 40vh;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .sidebar-list {
+                max-height: 200px;
+            }
+
+            .main-content {
+                flex: 1;
+            }
+
+            .status-stats {
+                flex-wrap: wrap;
+            }
+
+            .status-stat {
+                min-width: calc(50% - 8px);
+                flex: none;
+            }
+
+            .history-table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal {
+                margin: 10px;
+                max-height: 95vh;
+            }
+            
+            .btn {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+
+            .content-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .content-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+        }
+
+        /* 加载状态 */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* 隐藏类 */
+        .hidden {
+            display: none !important;
+        }
+        
+        /* 底部版权 */
+        .footer {
+            text-align: center;
+            padding: 24px;
+            margin-top: 32px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 13px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-primary);
+        }
+        
+        /* 给底部留出空间 */
+        .monitors-grid {
+            padding-bottom: 80px;
+        }
+        
+        .footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            color: var(--accent-green);
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 主页 - 卡片列表 -->
+    <div class="home-page" id="homePage">
+        <div class="page-header">
+            <div class="logo">🚀 酷监控</div>
+            <div class="header-actions">
+                <span style="color: var(--text-muted); font-size: 13px;" id="lastUpdate">--</span>
+                <button class="btn btn-icon" onclick="toggleTheme()" id="themeBtn" title="切换主题">
+                    🌙
+                </button>
+                <a href="/admin" class="btn btn-icon" title="后台管理" style="text-decoration: none;">
+                    ⚙️
+                </a>
+            </div>
+        </div>
+
+        <!-- 统计 -->
+        <div class="stats-row">
+            <div class="stat-card active" onclick="filterByStatus('all')" id="filterAll">
+                <div class="stat-label">📊 监控总数</div>
+                <div class="stat-value" id="statTotal">0</div>
+            </div>
+            <div class="stat-card" onclick="filterByStatus('online')" id="filterOnline">
+                <div class="stat-label">✅ 正常</div>
+                <div class="stat-value green" id="statOnline">0</div>
+            </div>
+            <div class="stat-card" onclick="filterByStatus('offline')" id="filterOffline">
+                <div class="stat-label">❌ 故障</div>
+                <div class="stat-value red" id="statOffline">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">📈 平均可用率</div>
+                <div class="stat-value blue" id="statUptime">0%</div>
+            </div>
+        </div>
+
+        <!-- 刷新控制栏 -->
+        <div class="refresh-bar">
+            <div class="refresh-progress-section">
+                <div class="refresh-progress-bar">
+                    <div class="refresh-progress-fill" id="refreshProgress"></div>
+                </div>
+                <div class="refresh-info">上次刷新: <span id="lastRefreshTime">--</span></div>
+            </div>
+            <div class="refresh-actions">
+                <span class="refresh-countdown" id="refreshCountdown">将在 60 秒后刷新</span>
+                <button class="btn-refresh" id="pauseBtn" onclick="togglePause()">
+                    <span id="pauseIcon">⏸</span> <span id="pauseText">暂停</span>
+                </button>
+                <button class="btn-refresh" onclick="manualRefresh()">
+                    🔄 立即刷新
+                </button>
+            </div>
+        </div>
+
+        <!-- 监控卡片网格 -->
+        <div class="monitors-grid" id="monitorsGrid">
+            <div class="loading"><div class="spinner"></div></div>
+        </div>
+        
+        <!-- 底部版权 -->
+        <div class="footer" id="siteFooter">
+            <div class="footer-links">
+                <a href="/admin">后台管理</a>
+                <span>·</span>
+                <span>by <span id="footerAuthor">Xpccm</span></span>
+            </div>
+            <div id="footerIcp"></div>
+        </div>
+    </div>
+
+    <!-- 详情页 -->
+    <div class="detail-page" id="detailPage">
+        <!-- 左侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">🚀 酷监控</div>
+                <button class="sidebar-add-btn" onclick="openAddModal()">+ 添加监控项</button>
+            </div>
+            <div class="sidebar-search">
+                <input type="text" class="search-input" placeholder="搜索监控项..." id="sidebarSearch" oninput="filterSidebarItems()">
+            </div>
+            <div class="sidebar-title" id="sidebarTitle">监控类型</div>
+            <div class="sidebar-list" id="sidebarList">
+                <!-- 动态填充 -->
+            </div>
+        </div>
+
+        <!-- 右侧主内容 -->
+        <div class="main-content">
+            <div class="content-header">
+                <div class="content-nav">
+                    <button class="back-btn" onclick="goHome()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 12H5M12 19l-7-7 7-7"/>
+                        </svg>
+                    </button>
+                    <div>
+                        <div class="content-title" id="detailTitle">监控名称</div>
+                        <div class="content-subtitle" id="detailSubtitle">状态速览</div>
+                    </div>
+                </div>
+                <div class="content-actions">
+                    <button class="icon-btn" onclick="refreshCurrentMonitor()" title="刷新">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                        </svg>
+                    </button>
+                    <button class="icon-btn" onclick="editCurrentMonitor()" title="编辑">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                    </button>
+                    <button class="icon-btn" onclick="deleteCurrentMonitor()" title="删除" style="color: var(--accent-red);">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 状态统计 -->
+            <div class="status-stats" id="statusStats">
+                <div class="status-stat">
+                    <div class="status-stat-header">
+                        <span class="status-stat-label green">正常</span>
+                        <span class="status-stat-icon green">✓</span>
+                    </div>
+                    <div class="status-stat-value" id="detailOnline">0</div>
+                </div>
+                <div class="status-stat">
+                    <div class="status-stat-header">
+                        <span class="status-stat-label red">故障</span>
+                        <span class="status-stat-icon red">!</span>
+                    </div>
+                    <div class="status-stat-value" id="detailOffline">0</div>
+                </div>
+                <div class="status-stat">
+                    <div class="status-stat-header">
+                        <span class="status-stat-label yellow">维护</span>
+                        <span class="status-stat-icon yellow">🔧</span>
+                    </div>
+                    <div class="status-stat-value">0</div>
+                </div>
+                <div class="status-stat">
+                    <div class="status-stat-header">
+                        <span class="status-stat-label blue">未知</span>
+                        <span class="status-stat-icon blue">?</span>
+                    </div>
+                    <div class="status-stat-value" id="detailUnknown">0</div>
+                </div>
+                <div class="status-stat">
+                    <div class="status-stat-header">
+                        <span class="status-stat-label purple">暂停</span>
+                        <span class="status-stat-icon purple">⏸</span>
+                    </div>
+                    <div class="status-stat-value" id="detailPaused">0</div>
+                </div>
+            </div>
+
+            <!-- 历史记录 -->
+            <div class="history-section">
+                <div class="section-title">📋 检测历史</div>
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>名称</th>
+                            <th>状态</th>
+                            <th>日期时间</th>
+                            <th>消息</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody">
+                        <!-- 动态填充 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加/编辑模态框 -->
+    <div class="modal-overlay" id="monitorModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">添加监控</h3>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="monitorForm">
+                    <input type="hidden" id="monitorId">
+                    
+                    <div class="form-group">
+                        <label class="form-label">监控名称 *</label>
+                        <input type="text" class="form-input" id="monitorName" placeholder="例如：我的网站" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">监控类型（可多选）</label>
+                        <div class="type-checkboxes" id="typeCheckboxes">
+                            <label class="type-checkbox" data-type="http">
+                                <span class="type-checkbox-icon">🌐</span>
+                                <span class="type-checkbox-label">HTTP(s)监控</span>
+                            </label>
+                            <label class="type-checkbox" data-type="ssl">
+                                <span class="type-checkbox-icon">🔒</span>
+                                <span class="type-checkbox-label">SSL证书监控</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">监控地址 *</label>
+                        <input type="text" class="form-input" id="monitorTarget" placeholder="https://example.com" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">检测间隔（秒）</label>
+                            <input type="number" class="form-input" id="monitorInterval" value="60" min="10">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">超时时间（秒）</label>
+                            <input type="number" class="form-input" id="monitorTimeout" value="30" min="5">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">通知设置</label>
+                        <p class="notify-settings-desc">选择当前监控项触发告警时要通知的方式</p>
+                        <div class="notify-channels-list" id="notifyChannelsList">
+                            <label class="notify-channel-item">
+                                <input type="checkbox" class="notify-checkbox" value="webhook">
+                                <span class="notify-channel-icon">🔗</span>
+                                <div class="notify-channel-info">
+                                    <span class="notify-channel-name">Webhook</span>
+                                    <span class="notify-channel-type">Webhook</span>
+                                </div>
+                            </label>
+                            <label class="notify-channel-item">
+                                <input type="checkbox" class="notify-checkbox" value="email">
+                                <span class="notify-channel-icon">📧</span>
+                                <div class="notify-channel-info">
+                                    <span class="notify-channel-name">邮件通知</span>
+                                    <span class="notify-channel-type">邮件</span>
+                                </div>
+                            </label>
+                            <label class="notify-channel-item">
+                                <input type="checkbox" class="notify-checkbox" value="wechat">
+                                <span class="notify-channel-icon">💬</span>
+                                <div class="notify-channel-info">
+                                    <span class="notify-channel-name">微信推送</span>
+                                    <span class="notify-channel-type">微信推送</span>
+                                </div>
+                            </label>
+                        </div>
+                        <p class="notify-settings-hint">💡 可以通过「通知渠道」添加、编辑和删除通知配置</p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveMonitor()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 通知渠道管理模态框 -->
+    <div class="modal-overlay" id="notifyModal">
+        <div class="modal" style="max-width: 650px;">
+            <div class="modal-header">
+                <h3 class="modal-title">🔔 通知渠道管理</h3>
+                <button class="modal-close" onclick="closeNotifyModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="notify-channels-header">
+                    <p class="notify-desc">管理通知渠道，当监控状态变化时发送通知</p>
+                    <button class="btn btn-primary btn-sm" onclick="showAddChannel()">+ 添加渠道</button>
+                </div>
+                
+                <!-- 渠道列表 -->
+                <div class="notify-channels-manage" id="notifyChannelsManage">
+                    <div class="empty-channels">暂无通知渠道，点击上方按钮添加</div>
+                </div>
+                
+                <!-- 添加/编辑渠道表单 -->
+                <div class="channel-form" id="channelForm" style="display: none;">
+                    <div class="channel-form-header">
+                        <h4 id="channelFormTitle">添加通知渠道</h4>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">渠道名称 *</label>
+                        <input type="text" class="form-input" id="channelName" placeholder="例如：我的Webhook">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">JavaScript 代码</label>
+                        <p class="notify-hint">可用变量：<code>name</code>(监控名称), <code>status</code>(状态), <code>message</code>(消息), <code>time</code>(时间)</p>
+                        <textarea class="notify-code" id="channelCode" placeholder="// 示例：发送到Webhook
+fetch('https://your-webhook-url.com', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        title: name + ' 状态变更',
+        content: message,
+        status: status,
+        time: time
+    })
+});"></textarea>
+                    </div>
+                    <div class="channel-form-actions">
+                        <button class="btn btn-secondary" onclick="hideChannelForm()">取消</button>
+                        <button class="btn btn-warning" onclick="testChannel()">🧪 测试</button>
+                        <button class="btn btn-primary" onclick="saveChannel()">保存渠道</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast容器 -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // 全局变量
+        let allMonitors = [];
+        let selectedTypes = [];
+        let currentMonitorId = null;
+        let isEditMode = false;
+        let currentFilter = 'all';
+
+        const TYPE_INFO = {
+            'http': { icon: '🌐', name: 'HTTP', color: '#58a6ff' },
+            'ssl': { icon: '🔒', name: 'SSL证书', color: '#a371f7' }
+        };
+
+        // Toast 通知
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // 加载监控数据
+        async function loadMonitors() {
+            try {
+                const response = await fetch('/api/monitors');
+                const data = await response.json();
+                allMonitors = data.monitors;
+                
+                document.getElementById('statTotal').textContent = data.stats.total;
+                document.getElementById('statOnline').textContent = data.stats.online;
+                document.getElementById('statOffline').textContent = data.stats.offline;
+                document.getElementById('statUptime').textContent = data.stats.avg_uptime + '%';
+                document.getElementById('lastUpdate').textContent = '更新于 ' + data.last_update;
+                
+                renderMonitorCards();
+                renderSidebarList();
+            } catch (error) {
+                console.error('加载失败:', error);
+                showToast('加载数据失败', 'error');
+            }
+        }
+        
+        // 按状态筛选
+        function filterByStatus(status) {
+            currentFilter = status;
+            
+            // 更新选中状态
+            document.querySelectorAll('.stat-card').forEach(card => card.classList.remove('active'));
+            if (status === 'all') {
+                document.getElementById('filterAll').classList.add('active');
+            } else if (status === 'online') {
+                document.getElementById('filterOnline').classList.add('active');
+            } else if (status === 'offline') {
+                document.getElementById('filterOffline').classList.add('active');
+            }
+            
+            renderMonitorCards();
+        }
+
+        // 渲染监控卡片
+        function renderMonitorCards() {
+            const grid = document.getElementById('monitorsGrid');
+            
+            if (allMonitors.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <div class="empty-state-icon">📡</div>
+                        <h3>暂无监控项目</h3>
+                        <p>点击「添加监控」开始监控你的网站</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 按ID排序（先添加的在前面）
+            const sorted = [...allMonitors].sort((a, b) => a.id - b.id);
+            
+            // 根据筛选条件过滤
+            let filtered = sorted;
+            if (currentFilter === 'online') {
+                filtered = sorted.filter(m => m.current_status === 1);
+            } else if (currentFilter === 'offline') {
+                filtered = sorted.filter(m => m.current_status === 0);
+            }
+            
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <div class="empty-state-icon">${currentFilter === 'online' ? '✅' : '❌'}</div>
+                        <h3>没有${currentFilter === 'online' ? '正常' : '故障'}的监控项</h3>
+                        <p>点击「监控总数」查看全部</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(m => renderCard(m)).join('');
+            
+            // 延迟绘制图表，确保DOM已渲染
+            setTimeout(() => {
+                filtered.forEach(m => drawChart(m, 50));
+            }, 100);
+        }
+
+        // 渲染单个卡片
+        function renderCard(monitor) {
+            const isOnline = monitor.current_status === 1;
+            const types = monitor.types || ['http'];
+            const uptime = monitor.uptime || 100;
+            
+            // 生成标签
+            const tags = types.map(t => {
+                const info = TYPE_INFO[t] || { name: t };
+                return `<span class="card-tag type">${info.name}</span>`;
+            }).join('');
+
+            // 生成状态条（全部填满，用当前状态补齐）
+            const history = monitor.history || [];
+            let statusBars = '';
+            const totalBars = 50;
+            
+            // 如果有历史记录，用第一条记录的状态填充空白部分
+            // 如果没有历史记录，用当前状态填充
+            const fillStatus = history.length > 0 ? history[0].status : (monitor.current_status || 1);
+            const emptyBars = Math.max(0, totalBars - history.length);
+            
+            // 先用第一条记录的状态填充左边
+            for (let i = 0; i < emptyBars; i++) {
+                statusBars += `<div class="status-bar ${fillStatus ? 'online' : 'offline'}"></div>`;
+            }
+            // 再填充有记录的（从旧到新）
+            for (let i = 0; i < history.length && i < totalBars; i++) {
+                const h = history[i];
+                statusBars += `<div class="status-bar ${h.status ? 'online' : 'offline'}"></div>`;
+            }
+
+            // 获取响应时间统计
+            const typeResults = monitor.type_results || {};
+            let ltTime = '--', avgTime = '--', maxTime = '--';
+            
+            // HTTP统计
+            if (typeResults['http']) {
+                ltTime = typeResults['http'].response_time || 0;
+                avgTime = monitor.avg_response_time || 0;
+                const history = typeResults['http'].history || [];
+                if (history.length > 0) {
+                    maxTime = Math.max(...history.map(h => h.response_time || 0));
+                } else {
+                    maxTime = ltTime;
+                }
+            }
+            
+            // SSL证书信息
+            let sslInfo = null;
+            if (types.includes('ssl') && typeResults['ssl']) {
+                const sslResult = typeResults['ssl'];
+                const daysLeft = sslResult.status_code || 0;
+                const sslStatus = sslResult.status;
+                let sslClass = 'ssl-safe';
+                if (daysLeft <= 7) {
+                    sslClass = 'ssl-danger';
+                } else if (daysLeft <= 30) {
+                    sslClass = 'ssl-warning';
+                }
+                sslInfo = { daysLeft, sslClass, status: sslStatus };
+            }
+
+            const uptimeClass = uptime < 90 ? 'danger' : (uptime < 99 ? 'warning' : '');
+            
+            return `
+                <div class="monitor-card">
+                    <div class="card-header">
+                        <div class="card-title-section">
+                            <div class="card-title">
+                                <span class="card-status-icon ${isOnline ? 'online' : 'offline'}">${isOnline ? '✓' : '!'}</span>
+                                ${monitor.name}
+                            </div>
+                            <div class="card-tags">
+                                <span class="card-tag">Core</span>
+                                <span class="card-tag method">Method: HTTPS</span>
+                            </div>
+                            <div class="card-type-line">${tags}</div>
+                        </div>
+                        <div class="uptime-section">
+                            <div class="uptime-ring">
+                                <svg width="40" height="40" viewBox="0 0 40 40">
+                                    <circle class="uptime-ring-bg" cx="20" cy="20" r="16"/>
+                                    <circle class="uptime-ring-progress ${uptimeClass}" 
+                                            cx="20" cy="20" r="16" 
+                                            stroke-dasharray="${2 * Math.PI * 16}" 
+                                            stroke-dashoffset="${2 * Math.PI * 16 - (uptime / 100) * 2 * Math.PI * 16}"/>
+                                </svg>
+                            </div>
+                            <span class="uptime-text ${uptimeClass}">${uptime.toFixed(2)}%</span>
+                        </div>
+                    </div>
+
+                    ${sslInfo ? `
+                    <div class="ssl-section ${sslInfo.sslClass}">
+                        <div class="ssl-left">
+                            <span class="ssl-icon-large">🔒</span>
+                            <span class="ssl-label">SSL证书剩余</span>
+                        </div>
+                        <div class="ssl-right">
+                            <div class="ssl-days-large">${sslInfo.daysLeft}</div>
+                            <div class="ssl-unit">天</div>
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    <div class="card-stats-row">
+                        <div class="card-stats">
+                            <span class="card-stat">LT:<span class="stat-value-green">${ltTime} ms</span></span>
+                            <span class="card-stat">AVG:<span class="stat-value-green">${avgTime} ms</span></span>
+                            <span class="card-stat">TA:<span class="stat-value-green">${maxTime} ms</span></span>
+                        </div>
+                        <div class="status-legend">
+                            <span class="legend-item"><span class="legend-dot online"></span>在线</span>
+                            <span class="legend-item"><span class="legend-dot maintenance"></span>维护</span>
+                            <span class="legend-item"><span class="legend-dot offline"></span>离线</span>
+                        </div>
+                    </div>
+
+                    <div class="status-bar-section">
+                        <div class="status-bars">${statusBars}</div>
+                    </div>
+
+                    <div class="card-divider"></div>
+
+                    <div class="range-tabs" data-monitor-id="${monitor.id}">
+                        <button class="range-tab active" data-range="50" onclick="switchRange(${monitor.id}, 50, this, event)">最近 50 次</button>
+                        <button class="range-tab" data-range="25" onclick="switchRange(${monitor.id}, 25, this, event)">最近 25 次</button>
+                        <button class="range-tab" data-range="10" onclick="switchRange(${monitor.id}, 10, this, event)">最近 10 次</button>
+                    </div>
+
+                    <div class="chart-wrapper">
+                        <div class="chart-y-labels" id="yLabels_${monitor.id}">
+                            <span>--</span>
+                            <span>--</span>
+                            <span>--</span>
+                        </div>
+                        <div class="chart-main">
+                            <canvas class="chart-canvas" id="chart_${monitor.id}" width="300" height="80"></canvas>
+                            <div class="chart-x-labels" id="xLabels_${monitor.id}">
+                                <span>--</span>
+                                <span>--</span>
+                                <span>--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 切换范围
+        function switchRange(monitorId, range, btn, event) {
+            // 阻止事件冒泡，避免触发卡片点击
+            if (event) event.stopPropagation();
+            
+            // 更新按钮状态
+            const tabs = btn.parentElement.querySelectorAll('.range-tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // 重新绘制图表
+            const monitor = allMonitors.find(m => m.id === monitorId);
+            if (monitor) {
+                drawChart(monitor, range);
+            }
+        }
+
+        // 绘制图表
+        function drawChart(monitor, range = 50) {
+            const canvas = document.getElementById(`chart_${monitor.id}`);
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const history = monitor.history || [];
+            
+            // 取最近N条记录
+            const data = history.slice(-range).map(h => h.response_time || 0);
+            
+            if (data.length === 0) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#6e7681';
+                ctx.font = '12px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText('暂无数据', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+            
+            // 计算范围
+            const maxVal = Math.max(...data, 1);
+            const minVal = Math.min(...data);
+            const padding = (maxVal - minVal) * 0.1 || 10;
+            const chartMax = maxVal + padding;
+            const chartMin = Math.max(0, minVal - padding);
+            
+            // 更新Y轴标签
+            const yLabels = document.getElementById(`yLabels_${monitor.id}`);
+            if (yLabels) {
+                const labels = yLabels.querySelectorAll('span');
+                labels[0].textContent = Math.round(chartMax) + ' ms';
+                labels[1].textContent = Math.round((chartMax + chartMin) / 2) + ' ms';
+                labels[2].textContent = Math.round(chartMin) + ' ms';
+            }
+            
+            // 更新X轴标签
+            const xLabels = document.getElementById(`xLabels_${monitor.id}`);
+            if (xLabels && history.length > 0) {
+                const labels = xLabels.querySelectorAll('span');
+                const startIdx = Math.max(0, history.length - range);
+                const endIdx = history.length - 1;
+                const midIdx = Math.floor((startIdx + endIdx) / 2);
+                
+                const formatTime = (t) => {
+                    if (!t) return '--';
+                    const parts = t.split(' ');
+                    return parts[1] ? parts[1].substring(0, 5) : t;
+                };
+                
+                labels[0].textContent = formatTime(history[startIdx]?.time);
+                labels[1].textContent = formatTime(history[midIdx]?.time);
+                labels[2].textContent = formatTime(history[endIdx]?.time);
+            }
+            
+            // 绘制
+            const width = canvas.width;
+            const height = canvas.height;
+            const range_val = chartMax - chartMin || 1;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制网格线
+            ctx.strokeStyle = 'rgba(48, 54, 61, 0.5)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 3; i++) {
+                const y = (height / 3) * i;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+            
+            // 绘制折线
+            ctx.beginPath();
+            ctx.strokeStyle = '#3fb950';
+            ctx.lineWidth = 2;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            
+            const stepX = width / (data.length - 1 || 1);
+            
+            data.forEach((val, i) => {
+                const x = i * stepX;
+                const y = height - ((val - chartMin) / range_val) * height;
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            
+            ctx.stroke();
+            
+            // 绘制渐变填充
+            const gradient = ctx.createLinearGradient(0, 0, 0, height);
+            gradient.addColorStop(0, 'rgba(63, 185, 80, 0.3)');
+            gradient.addColorStop(1, 'rgba(63, 185, 80, 0.0)');
+            
+            ctx.lineTo(width, height);
+            ctx.lineTo(0, height);
+            ctx.closePath();
+            ctx.fillStyle = gradient;
+            ctx.fill();
+        }
+
+        // 当前选中的类型
+        let currentSelectedType = null;
+
+        // 渲染侧边栏列表 - 显示当前监控的各个类型
+        function renderSidebarList() {
+            const list = document.getElementById('sidebarList');
+            const monitor = allMonitors.find(m => m.id === currentMonitorId);
+            
+            if (!monitor) {
+                list.innerHTML = '<div style="padding: 20px; color: var(--text-muted);">请选择监控项目</div>';
+                return;
+            }
+
+            const types = monitor.types || ['http'];
+            const typeResults = monitor.type_results || {};
+
+            list.innerHTML = types.map((t, index) => {
+                const info = TYPE_INFO[t] || { icon: '🌐', name: t };
+                const result = typeResults[t];
+                const isOnline = result && result.status === 1;
+                const isActive = currentSelectedType === t || (currentSelectedType === null && index === 0);
+                
+                // 如果没有选中的类型，默认选中第一个
+                if (currentSelectedType === null && index === 0) {
+                    currentSelectedType = t;
+                }
+                
+                return `
+                    <div class="sidebar-item ${isActive ? 'active' : ''}" onclick="selectType('${t}')">
+                        <div class="sidebar-item-icon">${info.icon}</div>
+                        <div class="sidebar-item-content">
+                            <div class="sidebar-item-name">${info.name}监控</div>
+                        </div>
+                        <div class="sidebar-item-status ${isOnline ? 'online' : 'offline'}"></div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 选择监控类型
+        function selectType(type) {
+            currentSelectedType = type;
+            renderSidebarList();
+            loadTypeDetail(type);
+        }
+
+        // 过滤侧边栏项目
+        function filterSidebarItems() {
+            const search = document.getElementById('sidebarSearch').value.toLowerCase();
+            const items = document.querySelectorAll('.sidebar-item');
+            items.forEach(item => {
+                const name = item.querySelector('.sidebar-item-name').textContent.toLowerCase();
+                item.style.display = name.includes(search) ? '' : 'none';
+            });
+        }
+
+        // 打开详情页
+        function openDetail(id) {
+            currentMonitorId = id;
+            currentSelectedType = null; // 重置选中的类型
+            document.getElementById('homePage').classList.add('hidden');
+            document.getElementById('detailPage').classList.add('active');
+            loadMonitorDetail(id);
+        }
+
+        // 加载监控详情
+        async function loadMonitorDetail(id) {
+            const monitor = allMonitors.find(m => m.id === id);
+            if (!monitor) return;
+
+            document.getElementById('detailTitle').textContent = monitor.name;
+            document.getElementById('detailSubtitle').textContent = monitor.target;
+            document.getElementById('sidebarTitle').textContent = monitor.name + ' - 监控类型';
+
+            // 渲染侧边栏类型列表
+            renderSidebarList();
+
+            // 统计类型状态
+            const types = monitor.types || ['http'];
+            const typeResults = monitor.type_results || {};
+            let onlineCount = 0, offlineCount = 0, unknownCount = 0;
+
+            types.forEach(t => {
+                const result = typeResults[t];
+                if (!result || result.status === undefined) {
+                    unknownCount++;
+                } else if (result.status === 1) {
+                    onlineCount++;
+                } else {
+                    offlineCount++;
+                }
+            });
+
+            document.getElementById('detailOnline').textContent = onlineCount;
+            document.getElementById('detailOffline').textContent = offlineCount;
+            document.getElementById('detailUnknown').textContent = unknownCount;
+
+            // 加载当前选中类型的历史
+            if (currentSelectedType) {
+                loadTypeDetail(currentSelectedType);
+            } else if (types.length > 0) {
+                currentSelectedType = types[0];
+                loadTypeDetail(types[0]);
+            }
+        }
+
+        // 加载特定类型的详情和历史
+        async function loadTypeDetail(type) {
+            const monitor = allMonitors.find(m => m.id === currentMonitorId);
+            if (!monitor) return;
+
+            const typeInfo = TYPE_INFO[type] || { icon: '🌐', name: type };
+            
+            try {
+                const response = await fetch(`/api/monitors/${currentMonitorId}/logs?limit=50`);
+                const data = await response.json();
+                
+                // 过滤当前类型的日志
+                const typeLogs = data.logs.filter(log => log.check_type === type);
+                renderHistoryTable(typeLogs, monitor, type);
+            } catch (error) {
+                console.error('加载历史失败:', error);
+            }
+        }
+
+        // 渲染历史表格
+        function renderHistoryTable(logs, monitor, currentType) {
+            const tbody = document.getElementById('historyTableBody');
+            const typeInfo = TYPE_INFO[currentType] || { icon: '🌐', name: currentType || 'HTTP' };
+            
+            // 更新表格标题
+            document.querySelector('.section-title').innerHTML = `📋 ${typeInfo.name}监控 - 检测历史`;
+            
+            if (!logs || logs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">暂无记录</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = logs.map(log => {
+                const logTypeInfo = TYPE_INFO[log.check_type] || { icon: '🌐', name: log.check_type || 'HTTP' };
+                const statusClass = log.status === 1 ? 'online' : 'offline';
+                const statusText = log.status === 1 ? '正常' : '异常';
+                
+                return `
+                    <tr>
+                        <td>
+                            <div class="table-name">
+                                <span>${logTypeInfo.icon}</span>
+                                ${logTypeInfo.name}监控
+                            </div>
+                        </td>
+                        <td>
+                            <span class="table-status ${statusClass}">
+                                <span style="width:6px;height:6px;border-radius:50%;background:currentColor;"></span>
+                                ${statusText}
+                            </span>
+                        </td>
+                        <td class="table-time">${log.created_at}</td>
+                        <td class="table-message">${log.response_time}ms - ${log.message || 'OK'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // 返回主页
+        function goHome() {
+            document.getElementById('homePage').classList.remove('hidden');
+            document.getElementById('detailPage').classList.remove('active');
+            currentMonitorId = null;
+        }
+
+        // 刷新当前监控
+        async function refreshCurrentMonitor() {
+            if (!currentMonitorId) return;
+            showToast('正在检查...', 'info');
+            try {
+                await fetch(`/api/monitors/${currentMonitorId}/check`, { method: 'POST' });
+                await loadMonitors();
+                loadMonitorDetail(currentMonitorId);
+                showToast('检查完成', 'success');
+            } catch (error) {
+                showToast('检查失败', 'error');
+            }
+        }
+
+        // 编辑当前监控
+        function editCurrentMonitor() {
+            if (!currentMonitorId) return;
+            editMonitor(currentMonitorId);
+        }
+
+        // 删除当前监控
+        async function deleteCurrentMonitor() {
+            if (!currentMonitorId) return;
+            const monitor = allMonitors.find(m => m.id === currentMonitorId);
+            if (!confirm(`确定要删除「${monitor?.name}」吗？`)) return;
+            
+            try {
+                await fetch(`/api/monitors/${currentMonitorId}`, { method: 'DELETE' });
+                showToast('删除成功', 'success');
+                goHome();
+                loadMonitors();
+            } catch (error) {
+                showToast('删除失败', 'error');
+            }
+        }
+
+        // 初始化类型复选框
+        function initTypeCheckboxes() {
+            document.querySelectorAll('.type-checkbox').forEach(cb => {
+                cb.addEventListener('click', function() {
+                    const type = this.dataset.type;
+                    if (this.classList.contains('selected')) {
+                        this.classList.remove('selected');
+                        selectedTypes = selectedTypes.filter(t => t !== type);
+                    } else {
+                        this.classList.add('selected');
+                        selectedTypes.push(type);
+                    }
+                    updateFormFields();
+                });
+            });
+        }
+
+        // 更新表单字段
+        function updateFormFields() {
+            // 简化版本：只有HTTP和SSL，无需额外字段
+        }
+
+        // ========== 通知渠道功能 ==========
+        
+        let notifyChannels = [];
+        let editingChannelIndex = -1;
+        
+        // 加载通知渠道
+        function loadNotifyChannels() {
+            const saved = localStorage.getItem('notifyChannels');
+            notifyChannels = saved ? JSON.parse(saved) : [];
+            renderNotifyChannels();
+            renderMonitorNotifyOptions();
+        }
+        
+        // 渲染通知渠道列表
+        function renderNotifyChannels() {
+            const container = document.getElementById('notifyChannelsManage');
+            if (notifyChannels.length === 0) {
+                container.innerHTML = '<div class="empty-channels">暂无通知渠道，点击上方按钮添加</div>';
+                return;
+            }
+            
+            container.innerHTML = notifyChannels.map((ch, index) => `
+                <div class="channel-item">
+                    <div class="channel-item-icon">⚡</div>
+                    <div class="channel-item-info">
+                        <div class="channel-item-name">${ch.name}</div>
+                        <div class="channel-item-type">自定义JS</div>
+                    </div>
+                    <div class="channel-item-actions">
+                        <button class="btn-edit" onclick="editChannel(${index})">编辑</button>
+                        <button class="btn-delete" onclick="deleteChannel(${index})">删除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // 渲染监控表单中的通知选项
+        function renderMonitorNotifyOptions() {
+            const container = document.getElementById('notifyChannelsList');
+            if (notifyChannels.length === 0) {
+                container.innerHTML = '<div class="empty-channels" style="padding: 15px;">暂无通知渠道，请先在「通知渠道」中添加</div>';
+                return;
+            }
+            
+            container.innerHTML = notifyChannels.map((ch, index) => `
+                <label class="notify-channel-item">
+                    <input type="checkbox" class="notify-checkbox" value="${index}">
+                    <span class="notify-channel-icon">⚡</span>
+                    <div class="notify-channel-info">
+                        <span class="notify-channel-name">${ch.name}</span>
+                        <span class="notify-channel-type">自定义JS</span>
+                    </div>
+                </label>
+            `).join('');
+        }
+        
+        // 打开通知渠道模态框
+        function openNotifyModal() {
+            hideChannelForm();
+            renderNotifyChannels();
+            document.getElementById('notifyModal').classList.add('active');
+        }
+        
+        // 关闭通知渠道模态框
+        function closeNotifyModal() {
+            document.getElementById('notifyModal').classList.remove('active');
+            renderMonitorNotifyOptions();
+        }
+        
+        // 显示添加渠道表单
+        function showAddChannel() {
+            editingChannelIndex = -1;
+            document.getElementById('channelFormTitle').textContent = '添加通知渠道';
+            document.getElementById('channelName').value = '';
+            document.getElementById('channelCode').value = '';
+            document.getElementById('channelForm').style.display = 'block';
+        }
+        
+        // 隐藏渠道表单
+        function hideChannelForm() {
+            document.getElementById('channelForm').style.display = 'none';
+            editingChannelIndex = -1;
+        }
+        
+        // 编辑渠道
+        function editChannel(index) {
+            editingChannelIndex = index;
+            const ch = notifyChannels[index];
+            document.getElementById('channelFormTitle').textContent = '编辑通知渠道';
+            document.getElementById('channelName').value = ch.name;
+            document.getElementById('channelCode').value = ch.code || '';
+            document.getElementById('channelForm').style.display = 'block';
+        }
+        
+        // 删除渠道
+        function deleteChannel(index) {
+            if (confirm('确定要删除这个通知渠道吗？')) {
+                notifyChannels.splice(index, 1);
+                localStorage.setItem('notifyChannels', JSON.stringify(notifyChannels));
+                renderNotifyChannels();
+                showToast('通知渠道已删除', 'success');
+            }
+        }
+        
+        // 保存渠道
+        function saveChannel() {
+            const name = document.getElementById('channelName').value.trim();
+            const code = document.getElementById('channelCode').value.trim();
+            
+            if (!name) {
+                showToast('请输入渠道名称', 'error');
+                return;
+            }
+            
+            if (!code) {
+                showToast('请输入 JavaScript 代码', 'error');
+                return;
+            }
+            
+            const channel = { name, code };
+            
+            if (editingChannelIndex >= 0) {
+                notifyChannels[editingChannelIndex] = channel;
+            } else {
+                notifyChannels.push(channel);
+            }
+            
+            localStorage.setItem('notifyChannels', JSON.stringify(notifyChannels));
+            renderNotifyChannels();
+            hideChannelForm();
+            showToast('通知渠道已保存', 'success');
+        }
+        
+        // 测试渠道
+        function testChannel() {
+            const code = document.getElementById('channelCode').value.trim();
+            
+            if (!code) {
+                showToast('请先输入 JavaScript 代码', 'error');
+                return;
+            }
+            
+            const name = '测试监控';
+            const status = '离线';
+            const message = '这是一条测试通知，监控状态已变更';
+            const time = new Date().toLocaleString('zh-CN');
+            
+            try {
+                eval(code);
+                showToast('测试通知已发送！请检查接收端', 'success');
+            } catch (error) {
+                showToast('执行失败: ' + error.message, 'error');
+            }
+        }
+
+        // ========== 监控管理功能 ==========
+        
+        // 打开添加模态框
+        function openAddModal() {
+            isEditMode = false;
+            document.getElementById('modalTitle').textContent = '添加监控';
+            document.getElementById('monitorForm').reset();
+            document.getElementById('monitorId').value = '';
+            selectedTypes = [];
+            document.querySelectorAll('.type-checkbox').forEach(cb => cb.classList.remove('selected'));
+            updateFormFields();
+            document.getElementById('monitorModal').classList.add('active');
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('monitorModal').classList.remove('active');
+        }
+
+        // 编辑监控
+        async function editMonitor(id) {
+            const monitor = allMonitors.find(m => m.id === id);
+            if (!monitor) return;
+
+            isEditMode = true;
+            document.getElementById('modalTitle').textContent = '编辑监控';
+            document.getElementById('monitorId').value = id;
+            document.getElementById('monitorName').value = monitor.name;
+            document.getElementById('monitorTarget').value = monitor.target;
+            document.getElementById('monitorInterval').value = monitor.interval;
+            document.getElementById('monitorTimeout').value = monitor.timeout;
+
+            selectedTypes = monitor.types || ['http'];
+            document.querySelectorAll('.type-checkbox').forEach(cb => {
+                if (selectedTypes.includes(cb.dataset.type)) {
+                    cb.classList.add('selected');
+                } else {
+                    cb.classList.remove('selected');
+                }
+            });
+            updateFormFields();
+            document.getElementById('monitorModal').classList.add('active');
+        }
+
+        // 保存监控
+        async function saveMonitor() {
+            const id = document.getElementById('monitorId').value;
+            const name = document.getElementById('monitorName').value;
+            const target = document.getElementById('monitorTarget').value;
+
+            if (!name || !target) {
+                showToast('请填写必填字段', 'error');
+                return;
+            }
+
+            if (selectedTypes.length === 0) {
+                showToast('请选择监控类型', 'error');
+                return;
+            }
+
+            const data = {
+                name,
+                types: selectedTypes,
+                target,
+                interval: parseInt(document.getElementById('monitorInterval').value) || 60,
+                timeout: parseInt(document.getElementById('monitorTimeout').value) || 30
+            };
+
+            try {
+                const url = id ? `/api/monitors/${id}` : '/api/monitors';
+                const method = id ? 'PUT' : 'POST';
+                const response = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    showToast(id ? '更新成功' : '创建成功', 'success');
+                    closeModal();
+                    loadMonitors();
+                    if (currentMonitorId) {
+                        loadMonitorDetail(currentMonitorId);
+                    }
+                } else {
+                    const err = await response.json();
+                    showToast(err.error || '保存失败', 'error');
+                }
+            } catch (error) {
+                showToast('保存失败', 'error');
+            }
+        }
+
+        // ========== 主题切换 ==========
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            // 更新按钮图标
+            document.getElementById('themeBtn').textContent = newTheme === 'light' ? '☀️' : '🌙';
+        }
+        
+        // 加载保存的主题
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.getElementById('themeBtn').textContent = savedTheme === 'light' ? '☀️' : '🌙';
+        }
+
+        // ========== 自动刷新控制 ==========
+        const REFRESH_INTERVAL = 60; // 60秒刷新一次
+        let refreshCountdown = REFRESH_INTERVAL;
+        let isPaused = false;
+        let refreshTimer = null;
+        
+        function updateRefreshUI() {
+            const progress = ((REFRESH_INTERVAL - refreshCountdown) / REFRESH_INTERVAL) * 100;
+            document.getElementById('refreshProgress').style.width = progress + '%';
+            document.getElementById('refreshCountdown').textContent = isPaused ? '已暂停' : `将在 ${refreshCountdown} 秒后刷新`;
+        }
+        
+        function startRefreshTimer() {
+            refreshTimer = setInterval(() => {
+                if (!isPaused) {
+                    refreshCountdown--;
+                    updateRefreshUI();
+                    
+                    if (refreshCountdown <= 0) {
+                        loadMonitors();
+                        refreshCountdown = REFRESH_INTERVAL;
+                        document.getElementById('lastRefreshTime').textContent = new Date().toLocaleString('zh-CN');
+                    }
+                }
+            }, 1000);
+        }
+        
+        function togglePause() {
+            isPaused = !isPaused;
+            document.getElementById('pauseIcon').textContent = isPaused ? '▶' : '⏸';
+            document.getElementById('pauseText').textContent = isPaused ? '继续' : '暂停';
+            document.getElementById('pauseBtn').classList.toggle('paused', isPaused);
+            updateRefreshUI();
+        }
+        
+        function manualRefresh() {
+            loadMonitors();
+            refreshCountdown = REFRESH_INTERVAL;
+            document.getElementById('lastRefreshTime').textContent = new Date().toLocaleString('zh-CN');
+            updateRefreshUI();
+            showToast('刷新成功', 'success');
+        }
+
+        // 加载网站设置
+        async function loadSiteSettings() {
+            try {
+                const response = await fetch('/api/settings');
+                const settings = await response.json();
+                
+                // 更新页面标题
+                if (settings.site_title) {
+                    document.title = settings.site_title;
+                    const logo = document.querySelector('.logo');
+                    if (logo) {
+                        logo.textContent = (settings.site_icon || '🚀') + ' ' + settings.site_title;
+                    }
+                }
+                
+                // 更新底部信息
+                if (settings.footer_author) {
+                    document.getElementById('footerAuthor').textContent = settings.footer_author;
+                }
+                
+                // 更新备案信息
+                const icpEl = document.getElementById('footerIcp');
+                if (settings.footer_icp) {
+                    if (settings.footer_url) {
+                        icpEl.innerHTML = `<a href="${settings.footer_url}" target="_blank">${settings.footer_icp}</a>`;
+                    } else {
+                        icpEl.textContent = settings.footer_icp;
+                    }
+                }
+            } catch (e) {
+                console.error('加载设置失败', e);
+            }
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTheme();
+            initTypeCheckboxes();
+            loadNotifyChannels();
+            loadMonitors();
+            loadSiteSettings();
+            document.getElementById('lastRefreshTime').textContent = new Date().toLocaleString('zh-CN');
+            startRefreshTimer();
+        });
+
+        // ESC 关闭模态框
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        document.getElementById('monitorModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+        
+        document.getElementById('notifyModal').addEventListener('click', function(e) {
+            if (e.target === this) closeNotifyModal();
+        });
+    </script>
+</body>
+</html>

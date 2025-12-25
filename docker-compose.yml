@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  monitor:
+    build: .
+    container_name: site-monitor
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      # 持久化数据库
+      - ./data:/app/data
+      - ./monitor.db:/app/monitor.db
+    environment:
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/stats"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+

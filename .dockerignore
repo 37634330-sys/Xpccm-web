@@ -1,0 +1,32 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+.env
+.venv
+venv/
+ENV/
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# 数据库（由volume挂载）
+*.db
+
+# 文档
+*.md
+LICENSE
+
+# 其他
+.DS_Store
+Thumbs.db
+

@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>后台管理 - 酷监控</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* 深色主题（默认） */
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-card: #1c2128;
+            --bg-hover: #252d38;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --border-color: #30363d;
+            --accent-green: #00a33c;
+            --accent-red: #f85149;
+            --accent-blue: #58a6ff;
+            --accent-yellow: #d29922;
+        }
+        
+        /* 浅色主题 */
+        [data-theme="light"] {
+            --bg-primary: #f6f8fa;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --bg-hover: #f3f4f6;
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --accent-green: #00a33c;
+            --accent-red: #dc2626;
+            --accent-blue: #2563eb;
+            --accent-yellow: #d97706;
+        }
+        
+        [data-theme="light"] .card,
+        [data-theme="light"] .login-box {
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        [data-theme="light"] .btn-secondary {
+            background: #fff;
+            border-color: #d1d5db;
+        }
+        
+        [data-theme="light"] .btn-primary {
+            color: #fff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary { background: var(--accent-green); color: #fff; }
+        .btn-secondary { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color); }
+        .btn-danger { background: var(--accent-red); color: #fff; }
+
+        /* 登录页 */
+        .login-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .login-box {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid var(--border-color);
+        }
+
+        .login-title {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .login-title h2 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .login-title p {
+            color: var(--text-muted);
+        }
+
+        /* 表单 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-green);
+        }
+
+        /* 卡片 */
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* 标签页 */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 16px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .tab:hover { color: var(--text-primary); }
+        .tab.active { background: var(--bg-hover); color: var(--text-primary); }
+
+        /* 隐藏 */
+        .hidden { display: none !important; }
+
+        /* 通知渠道列表 */
+        .channel-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .channel-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .channel-info h4 {
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .channel-info p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .channel-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* 监控列表 */
+        .monitor-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 12px;
+        }
+
+        .monitor-status {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+
+        .monitor-status.online { background: var(--accent-green); }
+        .monitor-status.offline { background: var(--accent-red); }
+
+        .monitor-info {
+            flex: 1;
+        }
+
+        .monitor-info h4 {
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .monitor-info p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* 消息提示 */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 14px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            z-index: 1000;
+        }
+
+        .toast.success { border-left: 4px solid var(--accent-green); }
+        .toast.error { border-left: 4px solid var(--accent-red); }
+
+        textarea.form-input {
+            min-height: 150px;
+            font-family: 'JetBrains Mono', monospace;
+            resize: vertical;
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录页面 -->
+    <div class="login-page" id="loginPage">
+        <div class="login-box">
+            <div class="login-title">
+                <h2>🔐 后台管理</h2>
+                <p id="loginHint">请登录管理员账号</p>
+            </div>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label class="form-label">用户名</label>
+                    <input type="text" class="form-input" id="loginUsername" value="admin" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">密码</label>
+                    <input type="password" class="form-input" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;" id="loginBtn">登录</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 管理后台 -->
+    <div class="container hidden" id="adminPage">
+        <div class="header">
+            <h1>⚙️ 后台管理</h1>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="toggleTheme()" id="themeBtn" title="切换主题">🌙</button>
+                <a href="/" class="btn btn-secondary">← 返回前台</a>
+                <button class="btn btn-danger" onclick="logout()">退出登录</button>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('monitors')">📡 监控管理</button>
+            <button class="tab" onclick="switchTab('channels')">🔔 通知渠道</button>
+            <button class="tab" onclick="switchTab('settings')">🎨 网站设置</button>
+            <button class="tab" onclick="switchTab('account')">👤 账号安全</button>
+        </div>
+
+        <!-- 监控管理 -->
+        <div class="tab-content" id="tab-monitors">
+            <div class="card">
+                <div class="card-title">
+                    <span>监控项目列表</span>
+                    <button class="btn btn-primary btn-sm" onclick="openAddMonitor()" style="margin-left: auto;">+ 添加监控</button>
+                </div>
+                <div id="monitorList">
+                    <div class="empty-state">加载中...</div>
+                </div>
+            </div>
+            
+            <!-- 添加/编辑监控表单 -->
+            <div class="card hidden" id="monitorFormCard">
+                <div class="card-title" id="monitorFormTitle">添加监控</div>
+                <div class="form-group">
+                    <label class="form-label">监控名称 *</label>
+                    <input type="text" class="form-input" id="monitorName" placeholder="例如：我的网站">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">监控地址 *</label>
+                    <input type="text" class="form-input" id="monitorTarget" placeholder="https://example.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">监控类型</label>
+                    <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px;">
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                            <input type="checkbox" id="typeHttp" checked> HTTP(s) 监控
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                            <input type="checkbox" id="typeSsl"> SSL 证书监控
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">检测间隔（秒）</label>
+                    <input type="number" class="form-input" id="monitorInterval" value="60" min="10">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">超时时间（秒）</label>
+                    <input type="number" class="form-input" id="monitorTimeout" value="30" min="5">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">通知渠道</label>
+                    <div id="notifyChannelSelect" style="margin-top: 8px;">
+                        <div class="empty-state" style="padding: 12px;">暂无通知渠道，请先添加</div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <button class="btn btn-secondary" onclick="cancelMonitorForm()">取消</button>
+                    <button class="btn btn-primary" onclick="saveMonitor()">保存</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 通知渠道 -->
+        <div class="tab-content hidden" id="tab-channels">
+            <div class="card">
+                <div class="card-title">
+                    <span>通知渠道管理</span>
+                    <button class="btn btn-primary btn-sm" onclick="openAddChannel()" style="margin-left: auto;">+ 添加渠道</button>
+                </div>
+                <div id="channelList">
+                    <div class="empty-state">加载中...</div>
+                </div>
+            </div>
+
+            <!-- 添加渠道表单 -->
+            <div class="card hidden" id="channelFormCard">
+                <div class="card-title" id="channelFormTitle">添加通知渠道</div>
+                <div class="form-group">
+                    <label class="form-label">渠道名称 *</label>
+                    <input type="text" class="form-input" id="channelName" placeholder="例如：我的Webhook">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">渠道类型</label>
+                    <select class="form-input" id="channelType" onchange="updateChannelHint()">
+                        <option value="webhook">🔗 Webhook</option>
+                        <option value="email">📧 邮件通知</option>
+                        <option value="wechat">💬 企业微信</option>
+                        <option value="telegram">✈️ Telegram</option>
+                        <option value="bark">📱 Bark</option>
+                        <option value="pushplus">📨 PushPlus</option>
+                        <option value="serverchan">🍚 Server酱</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">配置 (JSON)</label>
+                    <textarea class="form-input" id="channelConfig" placeholder='{"url": "https://your-webhook.com"}'></textarea>
+                    <div class="form-hint" id="channelHint">
+                        <div style="margin-top: 8px; padding: 12px; background: var(--bg-secondary); border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px;">
+                            <div style="color: var(--accent-green); margin-bottom: 8px;">📋 配置模板（点击复制）：</div>
+                            <pre id="configTemplate" onclick="copyTemplate()" style="cursor: pointer; margin: 0; white-space: pre-wrap; color: var(--text-secondary);">{"url": "https://your-webhook.com"}</pre>
+                        </div>
+                        <div style="margin-top: 12px; padding: 12px; background: var(--bg-secondary); border-radius: 8px; font-size: 12px;">
+                            <div style="color: var(--accent-blue); margin-bottom: 8px;">📌 通知变量（可在Webhook中使用）：</div>
+                            <div style="color: var(--text-muted); line-height: 1.8;">
+                                <code style="background: var(--bg-hover); padding: 2px 6px; border-radius: 4px;">name</code> - 监控名称<br>
+                                <code style="background: var(--bg-hover); padding: 2px 6px; border-radius: 4px;">status</code> - 状态 (1=正常, 0=故障)<br>
+                                <code style="background: var(--bg-hover); padding: 2px 6px; border-radius: 4px;">message</code> - 详细信息<br>
+                                <code style="background: var(--bg-hover); padding: 2px 6px; border-radius: 4px;">target</code> - 监控地址<br>
+                                <code style="background: var(--bg-hover); padding: 2px 6px; border-radius: 4px;">type</code> - 监控类型<br>
+                                <code style="background: var(--bg-hover); padding: 2px 6px; border-radius: 4px;">time</code> - 触发时间
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <button class="btn btn-secondary" onclick="cancelChannelForm()">取消</button>
+                    <button class="btn btn-primary" onclick="saveChannel()">保存</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 网站设置 -->
+        <div class="tab-content hidden" id="tab-settings">
+            <div class="card">
+                <div class="card-title">🎨 网站设置</div>
+                <div class="form-group">
+                    <label class="form-label">网站标题</label>
+                    <input type="text" class="form-input" id="siteTitle" placeholder="酷监控">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">网站图标 (Emoji)</label>
+                    <input type="text" class="form-input" id="siteIcon" placeholder="🚀">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">页脚作者</label>
+                    <input type="text" class="form-input" id="footerAuthor" placeholder="Xpccm">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">备案号</label>
+                    <input type="text" class="form-input" id="footerIcp" placeholder="京ICP备xxxxxxxx号">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">备案链接</label>
+                    <input type="text" class="form-input" id="footerUrl" placeholder="https://beian.miit.gov.cn/">
+                </div>
+                <button class="btn btn-primary" onclick="saveSettings()">保存设置</button>
+            </div>
+        </div>
+
+        <!-- 账号安全 -->
+        <div class="tab-content hidden" id="tab-account">
+            <div class="card">
+                <div class="card-title">🔒 修改密码</div>
+                <div class="form-group">
+                    <label class="form-label">原密码</label>
+                    <input type="password" class="form-input" id="oldPassword">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">新密码</label>
+                    <input type="password" class="form-input" id="newPassword">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">确认新密码</label>
+                    <input type="password" class="form-input" id="confirmPassword">
+                </div>
+                <button class="btn btn-primary" onclick="changePassword()">修改密码</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastContainer"></div>
+
+    <script>
+        let authToken = localStorage.getItem('adminToken') || '';
+        let editingChannelId = null;
+        let needSetup = false;
+
+        // Toast消息
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // API请求
+        async function api(url, method = 'GET', data = null) {
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                }
+            };
+            if (data) options.body = JSON.stringify(data);
+            const response = await fetch(url, options);
+            return response.json();
+        }
+
+        // 主题切换
+        function loadTheme() {
+            const theme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+            updateThemeIcon(theme);
+        }
+        
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme') || 'dark';
+            const newTheme = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+        
+        function updateThemeIcon(theme) {
+            const btn = document.getElementById('themeBtn');
+            if (btn) {
+                btn.textContent = theme === 'dark' ? '🌙' : '☀️';
+            }
+        }
+
+        // 检查登录状态
+        async function checkAuth() {
+            const result = await api('/api/auth/check');
+            if (result.need_setup) {
+                needSetup = true;
+                document.getElementById('loginHint').textContent = '首次使用，请设置管理员密码';
+                document.getElementById('loginBtn').textContent = '创建管理员';
+            }
+            if (result.authenticated) {
+                showAdminPage();
+            }
+        }
+
+        // 登录处理
+        async function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (needSetup) {
+                const result = await api('/api/auth/setup', 'POST', { username, password });
+                if (result.success) {
+                    showToast('管理员创建成功，请登录', 'success');
+                    needSetup = false;
+                    document.getElementById('loginHint').textContent = '请登录管理员账号';
+                    document.getElementById('loginBtn').textContent = '登录';
+                } else {
+                    showToast(result.error, 'error');
+                }
+                return;
+            }
+
+            const result = await api('/api/auth/login', 'POST', { username, password });
+            if (result.success) {
+                authToken = result.token;
+                localStorage.setItem('adminToken', authToken);
+                showAdminPage();
+            } else {
+                showToast(result.error, 'error');
+            }
+        }
+
+        // 显示管理页面
+        function showAdminPage() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('adminPage').classList.remove('hidden');
+            loadMonitors();
+            loadChannels();
+            loadChannelsForSelect();
+            loadSettings();
+        }
+
+        // 退出登录
+        async function logout() {
+            await api('/api/auth/logout', 'POST');
+            authToken = '';
+            localStorage.removeItem('adminToken');
+            location.reload();
+        }
+
+        // 切换标签页
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tab).classList.remove('hidden');
+        }
+
+        // ========== 监控管理 ==========
+        let editingMonitorId = null;
+        let allChannels = [];
+
+        async function loadMonitors() {
+            const result = await api('/api/monitors');
+            const container = document.getElementById('monitorList');
+            
+            if (!result.monitors || result.monitors.length === 0) {
+                container.innerHTML = '<div class="empty-state">暂无监控项目</div>';
+                return;
+            }
+
+            container.innerHTML = result.monitors.map(m => `
+                <div class="monitor-item">
+                    <div class="monitor-status ${m.current_status ? 'online' : 'offline'}"></div>
+                    <div class="monitor-info">
+                        <h4>${m.name}</h4>
+                        <p>${m.target}</p>
+                    </div>
+                    <div class="channel-actions">
+                        <button class="btn btn-secondary btn-sm" onclick="editMonitor(${m.id})">编辑</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteMonitor(${m.id})">删除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadChannelsForSelect() {
+            const result = await api('/api/notify-channels');
+            allChannels = result.channels || [];
+            renderChannelSelect([]);
+        }
+
+        function renderChannelSelect(selectedIds) {
+            const container = document.getElementById('notifyChannelSelect');
+            if (allChannels.length === 0) {
+                container.innerHTML = '<div style="color: var(--text-muted); font-size: 13px;">暂无通知渠道，请先在「通知渠道」中添加</div>';
+                return;
+            }
+            container.innerHTML = allChannels.map(c => `
+                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                    <input type="checkbox" class="notify-channel-cb" value="${c.id}" ${selectedIds.includes(c.id) ? 'checked' : ''}>
+                    <span>${c.name}</span>
+                    <span style="color: var(--text-muted); font-size: 12px;">(${c.type})</span>
+                </label>
+            `).join('');
+        }
+
+        function openAddMonitor() {
+            editingMonitorId = null;
+            document.getElementById('monitorFormTitle').textContent = '添加监控';
+            document.getElementById('monitorName').value = '';
+            document.getElementById('monitorTarget').value = '';
+            document.getElementById('typeHttp').checked = true;
+            document.getElementById('typeSsl').checked = false;
+            document.getElementById('monitorInterval').value = '60';
+            document.getElementById('monitorTimeout').value = '30';
+            renderChannelSelect([]);
+            document.getElementById('monitorFormCard').classList.remove('hidden');
+        }
+
+        async function editMonitor(id) {
+            editingMonitorId = id;
+            const result = await api(`/api/monitors/${id}`);
+            if (!result.id) {
+                showToast('加载失败', 'error');
+                return;
+            }
+            
+            document.getElementById('monitorFormTitle').textContent = '编辑监控';
+            document.getElementById('monitorName').value = result.name || '';
+            document.getElementById('monitorTarget').value = result.target || '';
+            
+            const types = result.types || ['http'];
+            document.getElementById('typeHttp').checked = types.includes('http');
+            document.getElementById('typeSsl').checked = types.includes('ssl');
+            
+            document.getElementById('monitorInterval').value = result.interval || 60;
+            document.getElementById('monitorTimeout').value = result.timeout || 30;
+            
+            const channelIds = result.notify_channels || [];
+            renderChannelSelect(channelIds);
+            
+            document.getElementById('monitorFormCard').classList.remove('hidden');
+        }
+
+        function cancelMonitorForm() {
+            document.getElementById('monitorFormCard').classList.add('hidden');
+        }
+
+        async function saveMonitor() {
+            const name = document.getElementById('monitorName').value.trim();
+            const target = document.getElementById('monitorTarget').value.trim();
+            
+            if (!name || !target) {
+                showToast('请填写监控名称和地址', 'error');
+                return;
+            }
+            
+            const types = [];
+            if (document.getElementById('typeHttp').checked) types.push('http');
+            if (document.getElementById('typeSsl').checked) types.push('ssl');
+            
+            if (types.length === 0) {
+                showToast('请至少选择一种监控类型', 'error');
+                return;
+            }
+            
+            const notifyChannels = [];
+            document.querySelectorAll('.notify-channel-cb:checked').forEach(cb => {
+                notifyChannels.push(parseInt(cb.value));
+            });
+            
+            const data = {
+                name,
+                target,
+                types,
+                interval: parseInt(document.getElementById('monitorInterval').value) || 60,
+                timeout: parseInt(document.getElementById('monitorTimeout').value) || 30,
+                notify_channels: notifyChannels
+            };
+            
+            let result;
+            if (editingMonitorId) {
+                result = await api(`/api/monitors/${editingMonitorId}`, 'PUT', data);
+            } else {
+                result = await api('/api/monitors', 'POST', data);
+            }
+            
+            if (result.success || result.id) {
+                showToast(editingMonitorId ? '修改成功' : '添加成功', 'success');
+                cancelMonitorForm();
+                loadMonitors();
+            } else {
+                showToast(result.error || '保存失败', 'error');
+            }
+        }
+
+        async function deleteMonitor(id) {
+            if (!confirm('确定要删除这个监控项目吗？')) return;
+            const result = await api(`/api/monitors/${id}`, 'DELETE');
+            if (result.success) {
+                showToast('删除成功', 'success');
+                loadMonitors();
+            } else {
+                showToast(result.error || '删除失败', 'error');
+            }
+        }
+
+        // ========== 通知渠道 ==========
+        async function loadChannels() {
+            const result = await api('/api/notify-channels');
+            const container = document.getElementById('channelList');
+            
+            if (!result.channels || result.channels.length === 0) {
+                container.innerHTML = '<div class="empty-state">暂无通知渠道</div>';
+                return;
+            }
+
+            container.innerHTML = result.channels.map(c => `
+                <div class="channel-item">
+                    <div class="channel-info">
+                        <h4>${c.name}</h4>
+                        <p>${c.type}</p>
+                    </div>
+                    <div class="channel-actions">
+                        <button class="btn btn-secondary btn-sm" onclick="testChannel(${c.id})">测试</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteChannel(${c.id})">删除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 渠道配置模板
+        const channelTemplates = {
+            webhook: {
+                template: '{\n  "url": "https://your-webhook-url.com/notify"\n}',
+                desc: 'Webhook会收到包含监控信息的JSON数据'
+            },
+            email: {
+                template: '{\n  "smtp_host": "smtp.qq.com",\n  "smtp_port": 465,\n  "smtp_user": "your-email@qq.com",\n  "smtp_pass": "授权码",\n  "from_email": "your-email@qq.com",\n  "to_email": "receive@example.com",\n  "use_ssl": true\n}',
+                desc: '使用SMTP发送邮件通知，QQ邮箱需要使用授权码'
+            },
+            wechat: {
+                template: '{\n  "webhook_url": "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx"\n}',
+                desc: '企业微信群机器人Webhook地址'
+            },
+            telegram: {
+                template: '{\n  "bot_token": "123456:ABC-xxx",\n  "chat_id": "123456789"\n}',
+                desc: 'Telegram Bot Token 和 Chat ID'
+            },
+            bark: {
+                template: '{\n  "key": "your-bark-key",\n  "server": "https://api.day.app"\n}',
+                desc: 'Bark推送密钥，iOS设备专用'
+            },
+            pushplus: {
+                template: '{\n  "token": "your-pushplus-token"\n}',
+                desc: 'PushPlus微信推送Token'
+            },
+            serverchan: {
+                template: '{\n  "sendkey": "your-sendkey"\n}',
+                desc: 'Server酱 SendKey'
+            }
+        };
+
+        function updateChannelHint() {
+            const type = document.getElementById('channelType').value;
+            const template = channelTemplates[type];
+            if (template) {
+                document.getElementById('configTemplate').textContent = template.template;
+            }
+        }
+
+        function copyTemplate() {
+            const template = document.getElementById('configTemplate').textContent;
+            document.getElementById('channelConfig').value = template;
+            showToast('已复制模板到配置框', 'success');
+        }
+
+        function openAddChannel() {
+            editingChannelId = null;
+            document.getElementById('channelFormTitle').textContent = '添加通知渠道';
+            document.getElementById('channelName').value = '';
+            document.getElementById('channelType').value = 'webhook';
+            document.getElementById('channelConfig').value = '';
+            document.getElementById('channelFormCard').classList.remove('hidden');
+            updateChannelHint();
+        }
+
+        function cancelChannelForm() {
+            document.getElementById('channelFormCard').classList.add('hidden');
+        }
+
+        async function saveChannel() {
+            const name = document.getElementById('channelName').value;
+            const type = document.getElementById('channelType').value;
+            let config;
+            
+            try {
+                config = JSON.parse(document.getElementById('channelConfig').value || '{}');
+            } catch {
+                showToast('配置JSON格式错误', 'error');
+                return;
+            }
+
+            const result = await api('/api/notify-channels', 'POST', { name, type, config });
+            if (result.success) {
+                showToast('保存成功', 'success');
+                cancelChannelForm();
+                loadChannels();
+            } else {
+                showToast(result.error || '保存失败', 'error');
+            }
+        }
+
+        async function testChannel(id) {
+            const result = await api(`/api/notify-channels/${id}/test`, 'POST');
+            if (result.success) {
+                showToast('测试通知已发送', 'success');
+            } else {
+                showToast('测试失败', 'error');
+            }
+        }
+
+        async function deleteChannel(id) {
+            if (!confirm('确定要删除这个通知渠道吗？')) return;
+            const result = await api(`/api/notify-channels/${id}`, 'DELETE');
+            if (result.success) {
+                showToast('删除成功', 'success');
+                loadChannels();
+            }
+        }
+
+        // ========== 网站设置 ==========
+        async function loadSettings() {
+            const settings = await api('/api/settings');
+            document.getElementById('siteTitle').value = settings.site_title || '';
+            document.getElementById('siteIcon').value = settings.site_icon || '';
+            document.getElementById('footerAuthor').value = settings.footer_author || '';
+            document.getElementById('footerIcp').value = settings.footer_icp || '';
+            document.getElementById('footerUrl').value = settings.footer_url || '';
+        }
+
+        async function saveSettings() {
+            const data = {
+                site_title: document.getElementById('siteTitle').value,
+                site_icon: document.getElementById('siteIcon').value,
+                footer_author: document.getElementById('footerAuthor').value,
+                footer_icp: document.getElementById('footerIcp').value,
+                footer_url: document.getElementById('footerUrl').value
+            };
+
+            const result = await api('/api/settings', 'PUT', data);
+            if (result.success) {
+                showToast('设置保存成功', 'success');
+            } else {
+                showToast(result.error || '保存失败', 'error');
+            }
+        }
+
+        // ========== 修改密码 ==========
+        async function changePassword() {
+            const oldPassword = document.getElementById('oldPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (newPassword !== confirmPassword) {
+                showToast('两次输入的密码不一致', 'error');
+                return;
+            }
+
+            const result = await api('/api/auth/password', 'PUT', { old_password: oldPassword, new_password: newPassword });
+            if (result.success) {
+                showToast('密码修改成功', 'success');
+                document.getElementById('oldPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmPassword').value = '';
+            } else {
+                showToast(result.error || '修改失败', 'error');
+            }
+        }
+
+        // 初始化
+        loadTheme();
+        checkAuth();
+    </script>
+</body>
+</html>
+
