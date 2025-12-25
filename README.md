@@ -13,6 +13,19 @@
 - 🔐 **后台管理**：安全的管理员认证系统
 - 💾 **轻量存储**：SQLite数据库，无需额外依赖
 
+
+
+<img width="1718" height="1304" alt="image" src="https://github.com/user-attachments/assets/58bc6d5c-aca5-425e-9d23-ff9b514a3a7d" />
+
+
+<img width="1476" height="1209" alt="image" src="https://github.com/user-attachments/assets/ddbe5fee-6e29-4dc1-98d6-0f3310c14cfc" />
+
+
+
+
+
+
+
 ## 🐳 Docker 一键部署（推荐）
 
 ```bash
